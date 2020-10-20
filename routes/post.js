@@ -69,7 +69,7 @@ router.get('/newsfeed/:id', async (req, res) => {
       profile: {
         $in: profile.following
       }
-    }).populate({ path: 'profile' })
+    }).populate({ path: 'profile' }).sort('-createdAt');
 
     res.send(posts);
   } catch (err) {
