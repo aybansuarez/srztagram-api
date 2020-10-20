@@ -11,6 +11,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 
 // FOLDER IMPORTS
 const initializePassport = require('../config/passport');
@@ -41,7 +42,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: CORS_ORIGIN,
   credentials: true,
 }));
 app.use(session({
