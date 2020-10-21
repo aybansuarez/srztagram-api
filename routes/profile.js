@@ -37,7 +37,7 @@ router.post('/:id/update', async (req, res) => {
     let avatar = req.body.avatar;
     if (avatar) {
       response = await cloudinary.uploader.upload(avatar, {
-        upload_preset: 'mern_app'
+        upload_preset: process.env.CLOUDINARY_FOLDER || 'dev_folder'
       })
       avatar = response.secure_url;
     }
