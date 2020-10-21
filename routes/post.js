@@ -38,7 +38,7 @@ router.get('/get_post_details/:id/u/:username', async (req, res) => {
       _id: req.params.id,
       profile: db.Types.ObjectId(profile._id)
     }).populate({
-      path: 'profile comments', options: { sort: { createdAt: -1 } },
+      path: 'profile likes comments', options: { sort: { createdAt: -1 } },
       populate: [{
         path: 'profile', select: 'username is_private'
       }]
@@ -60,6 +60,16 @@ router.get('/u/:username', async (req, res) => {
   }
 });
 
+// router.get('/get_likers/:id', async (req, res) => {
+//   try {
+//     const post = await Post.findById(req.params.id).populate({ path: 'likes' });
+
+//     res.send(post.likes);
+//   } catch (err) {
+//     res.status(400).send(err);
+//   }
+// });
+
 router.get('/newsfeed/:id', async (req, res) => {
   try {
     const profile = await Profile.findById(req.params.id);
@@ -69,7 +79,7 @@ router.get('/newsfeed/:id', async (req, res) => {
       profile: {
         $in: profile.following
       }
-    }).populate({ path: 'profile' }).sort('-createdAt');
+    }).populate({ path: 'profile likes' }).sort('-createdAt');
 
     res.send(posts);
   } catch (err) {
@@ -79,10 +89,15 @@ router.get('/newsfeed/:id', async (req, res) => {
 
 router.patch('/:profileid/like/:postid', async (req, res) => {
   try {
-    const post = await Post.updateOne(
-      { _id: req.params.postid }, { $addToSet: { likes: req.params.profileid } }
-    );
-    res.status(200).send();
+    const post = await Post.findOneAndUpdate(
+      { _id: req.params.postid },
+      { $addToSet: { likes: req.params.profileid } },
+      {
+        new: true, fields: {
+          likes: { $slice: -1 }
+        },
+      }).populate({ path: 'likes' });
+    res.status(200).send(post);
   } catch (err) {
     res.status(400).send(err);
   }
@@ -90,10 +105,10 @@ router.patch('/:profileid/like/:postid', async (req, res) => {
 
 router.patch('/:profileid/unlike/:postid', async (req, res) => {
   try {
-    const post = await Post.updateOne(
-      { _id: req.params.postid }, { $pull: { likes: req.params.profileid } }
-    );
-    res.status(200).send();
+    const post = await Post.findOneAndUpdate(
+      { _id: req.params.postid }, { $pull: { likes: req.params.profileid } }, { new: true }
+    ).populate({ path: 'likes' });
+    res.status(200).send(post);
   } catch (err) {
     res.status(400).send(err);
   }
