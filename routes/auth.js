@@ -5,8 +5,6 @@ const db = require('mongoose');
 
 const User = require('../models/User');
 const Profile = require('../models/Profile');
-// const Following = require('../models/Following');
-// const Follower = require('../models/Follower');
 const userValidation = require('../validations/userValidation');
 
 const router = express.Router();
@@ -58,16 +56,6 @@ router.post('/signup', (req, res) => {
         user: db.Types.ObjectId(newUser._id)
       });
       await newProfile.save();
-
-      // const newFollowing = new Following({
-      //   profile: db.Types.ObjectId(newProfile._id)
-      // });
-      // await newFollowing.save();
-
-      // const newFollower = new Follower({
-      //   profile: db.Types.ObjectId(newProfile._id)
-      // });
-      // await newFollower.save();
       res.send();
     }
   });

@@ -13,6 +13,11 @@ const profileSchema = new Schema({
     unique: true,
     required: true
   },
+  bio: {
+    type: String,
+    max: 100,
+    default: ''
+  },
   birthday: Date,
   is_private: {
     type: Boolean,

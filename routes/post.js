@@ -25,7 +25,7 @@ router.post('/create', async (req, res) => {
     });
 
     await post.save();
-    res.send('New post added!');
+    res.send(post);
   } catch (err) {
     res.status(400).send(err);
   }
@@ -72,6 +72,28 @@ router.get('/newsfeed/:id', async (req, res) => {
     }).populate({ path: 'profile' }).sort('-createdAt');
 
     res.send(posts);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.patch('/:profileid/like/:postid', async (req, res) => {
+  try {
+    const post = await Post.updateOne(
+      { _id: req.params.postid }, { $addToSet: { likes: req.params.profileid } }
+    );
+    res.status(200).send();
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.patch('/:profileid/unlike/:postid', async (req, res) => {
+  try {
+    const post = await Post.updateOne(
+      { _id: req.params.postid }, { $pull: { likes: req.params.profileid } }
+    );
+    res.status(200).send();
   } catch (err) {
     res.status(400).send(err);
   }

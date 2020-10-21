@@ -44,6 +44,7 @@ router.post('/:id/update', async (req, res) => {
 
     let data = {
       name: req.body.name,
+      bio: req.body.bio,
       username: req.body.username,
       birthday: req.body.birthday,
       is_private: req.body.is_private,
@@ -65,46 +66,8 @@ router.post('/:id/update', async (req, res) => {
     }, { new: true });
     res.send('Profile updated successfully.');
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send('Encountered an error.');
   }
 });
-
-
-// FOLLOW
-// router.post('/:id1/follow/:id2', async (req, res) => {
-//   try {
-//     const profile1 = await Profile.findById(req.params.id1);
-//     const profile2 = await Profile.findById(req.params.id2);
-
-//     await profile1.following.push(profile2);
-//     await profile2.followers.push(profile1);
-
-//     await profile1.save();
-//     await profile2.save();
-
-//     res.send();
-//   } catch (err) {
-//     res.status(400).send(err);
-//   }
-// });
-
-// UNFOLLOW
-// router.post('/:id1/unfollow/:id2', async (req, res) => {
-//   try {
-//     const profile1 = await Profile.findById(req.params.id1);
-//     const profile2 = await Profile.findById(req.params.id2);
-
-//     await profile1.following.push(profile2);
-//     await profile2.followers.push(profile1);
-
-//     await profile1.save();
-//     await profile2.save();
-
-//     res.send();
-//   } catch (err) {
-//     res.status(400).send(err);
-//   }
-// });
-
 
 module.exports = router;
