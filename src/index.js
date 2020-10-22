@@ -6,10 +6,15 @@ const passport = require('passport');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const dotenv = require('dotenv');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const io = require('socket.io')(server);
+
+const { addUser, getUser, removeUser, getUsersInRoom } = require('./helper')
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 
@@ -21,7 +26,7 @@ const profileRoutes = require('../routes/profile');
 const postRoutes = require('../routes/post');
 const commentRoutes = require('../routes/comment');
 const followRoutes = require('../routes/follow');
-
+const messageRoutes = require('../routes/message');
 
 // DATABASE
 mongoose.connect(process.env.MONGODB_URI, {
@@ -32,7 +37,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
   .then(() => {
     console.log('MongoDB database connection established successfully');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port: ${PORT}`);
     });
   })
@@ -55,6 +60,31 @@ app.use(passport.initialize());
 app.use(passport.session());
 initializePassport(passport);
 
+io.on('connection', (socket) => {
+  console.log(`connected ${socket.id}`)
+
+  socket.on('join', ({ profile, chat }, callback) => {
+    const { error, user } = addUser({ id: socket.id, profile, chat });
+
+    if (error) return callback(error);
+
+    socket.join(user.chat);
+    callback();
+  })
+
+  socket.on('sendMessage', (message, callback) => {
+    const user = getUser(socket.id);
+    io.to(user.chat).emit('message', { profile: user.profile, message: message });
+    callback();
+  })
+
+  socket.on('forceDisconnect', () => {
+    const user = removeUser(socket.id);
+    console.log(`disconnected`);
+    socket.disconnect();
+  });
+});
+
 // ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -62,4 +92,4 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/follows', followRoutes);
-
+app.use('/api/messages', messageRoutes);
