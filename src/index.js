@@ -47,7 +47,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({
-  origin: '*',
+  origin: CORS_ORIGIN,
   credentials: true,
 }));
 app.use(session({
