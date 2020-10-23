@@ -38,7 +38,7 @@ router.get('/get_post_details/:id/u/:username', async (req, res) => {
       _id: req.params.id,
       profile: db.Types.ObjectId(profile._id)
     }).populate({
-      path: 'profile likes comments', options: { sort: { createdAt: -1 } },
+      path: 'profile likes comments',
       populate: [{
         path: 'profile', select: 'username is_private'
       }]
