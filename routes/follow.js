@@ -1,8 +1,7 @@
 const express = require('express');
 const db = require('mongoose');
-// const Following = require('../models/Following');
-// const Follower = require('../models/Follower');
 const Profile = require('../models/Profile');
+const Chat = require('../models/Chat');
 
 const router = express.Router();
 
@@ -37,6 +36,18 @@ router.patch('/:id1/follow/:id2', async (req, res) => {
     const profile2 = db.Types.ObjectId(req.params.id2);
 
     if (profile1._id === profile2._id) return res.status(400).send();
+
+    let chat = await Chat.find({ profiles: [profile1, profile2] })
+    if (chat.length == 0) {
+      chat = await Chat.find({ profiles: [profile2, profile1] })
+      if (chat.length == 0) {
+        let newChat = new Chat({
+          messages: [],
+          profiles: [profile1, profile2]
+        })
+        await newChat.save();
+      }
+    }
 
     const followingQuery = {
       _id: profile1,

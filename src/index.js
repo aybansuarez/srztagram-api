@@ -72,9 +72,9 @@ io.on('connection', (socket) => {
     callback();
   })
 
-  socket.on('sendMessage', (message, callback) => {
+  socket.on('sendMessage', ({ message, profile }, callback) => {
     const user = getUser(socket.id);
-    io.to(user.chat).emit('message', { profile: user.profile, message: message });
+    io.to(user.chat).emit('message', { message, profile });
     callback();
   })
 

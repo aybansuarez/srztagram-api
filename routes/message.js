@@ -13,13 +13,6 @@ router.get('/all/:id', async (req, res) => {
       profiles: db.Types.ObjectId(profile._id)
     }).populate('profiles');
 
-    await chats.forEach(chat => {
-      let index = chat.profiles.map(
-        (chatProfile) => { return chatProfile._id }
-      ).indexOf(profile._id);
-      chat.profiles.splice(index, 1);
-    });
-
     res.send(chats)
   } catch (err) {
     res.status(400).send(err);
@@ -33,7 +26,8 @@ router.get('/chat/:id', async (req, res) => {
     )
     let data;
     if (chat.messages.length > 0) {
-      data = await chat.populate({ path: 'profiles messages' }).execPopulate();
+      data = await chat
+        .populate({ path: 'profiles messages', populate: { path: 'profile' } }).execPopulate();
     } else {
       data = await chat.populate({ path: 'profiles' }).execPopulate();
     }

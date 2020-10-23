@@ -60,16 +60,6 @@ router.get('/u/:username', async (req, res) => {
   }
 });
 
-// router.get('/get_likers/:id', async (req, res) => {
-//   try {
-//     const post = await Post.findById(req.params.id).populate({ path: 'likes' });
-
-//     res.send(post.likes);
-//   } catch (err) {
-//     res.status(400).send(err);
-//   }
-// });
-
 router.get('/newsfeed/:id', async (req, res) => {
   try {
     const profile = await Profile.findById(req.params.id);
