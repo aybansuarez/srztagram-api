@@ -47,7 +47,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({
-  origin: CORS_ORIGIN,
+  origin: '*',
   credentials: true,
 }));
 app.use(session({
@@ -61,7 +61,7 @@ app.use(passport.session());
 initializePassport(passport);
 
 io.on('connection', (socket) => {
-  console.log(`connected ${socket.id}`)
+  console.log(`connected`)
 
   socket.on('join', ({ profile, chat }, callback) => {
     const { error, user } = addUser({ id: socket.id, profile, chat });
@@ -79,7 +79,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('forceDisconnect', () => {
-    const user = removeUser(socket.id);
+    removeUser(socket.id);
     console.log(`disconnected`);
     socket.disconnect();
   });
