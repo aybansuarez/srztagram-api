@@ -30,6 +30,31 @@ router.get('/search', async (req, res) => {
   }
 });
 
+
+router.get('/:username/followers', async (req, res) => {
+  try {
+    const profile = await Profile.findOne(
+      { username: req.params.username }
+    ).populate({ path: 'followers' });
+
+    res.send(profile.followers);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.get('/:username/following', async (req, res) => {
+  try {
+    const profile = await Profile.findOne(
+      { username: req.params.username }
+    ).populate({ path: 'following' });
+
+    res.send(profile.following);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
 // GET PROFILE DETAILS
 router.get('/:username', async (req, res) => {
   try {

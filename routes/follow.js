@@ -5,31 +5,6 @@ const Chat = require('../models/Chat');
 
 const router = express.Router();
 
-
-router.get('/get_followers/:username', async (req, res) => {
-  try {
-    const profile = await Profile.findOne(
-      { username: req.params.username }
-    ).populate({ path: 'followers' });
-
-    res.send(profile);
-  } catch (err) {
-    res.status(400).send(err);
-  }
-});
-
-router.get('/get_following/:username', async (req, res) => {
-  try {
-    const profile = await Profile.findOne(
-      { username: req.params.username }
-    ).populate({ path: 'following' });
-
-    res.send(profile);
-  } catch (err) {
-    res.status(400).send(err);
-  }
-});
-
 router.patch('/:id1/follow/:id2', async (req, res) => {
   try {
     const profile1 = db.Types.ObjectId(req.params.id1);
