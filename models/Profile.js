@@ -35,6 +35,12 @@ const profileSchema = new Schema({
       ref: 'Profile'
     }
   ],
+  posts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Post'
+    }
+  ],
   avatar: {
     type: String,
     default: ''
