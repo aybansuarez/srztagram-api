@@ -8,9 +8,22 @@ const Profile = require('../models/Profile');
 const router = express.Router();
 
 // GET ALL PROFILES LIST
-router.get('/all/except/:id', async (req, res) => {
+router.get('/search', async (req, res) => {
+  var query = {};
+  if (req.query.q) {
+    query = {
+      $or: [
+        { username: { $regex: req.query.q, $options: 'i' } },
+        { name: { $regex: req.query.q, $options: 'i' } }
+      ]
+    }
+  }
+
   try {
-    const profiles = await Profile.find({ _id: { $ne: req.params.id } });
+    let profiles = await Profile.find(query).limit(5);
+    if (req.query.q) {
+      profiles = await Profile.find(query);
+    }
     res.send(profiles);
   } catch (err) {
     res.status(400).send(err);
