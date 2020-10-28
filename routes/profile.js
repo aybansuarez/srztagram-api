@@ -33,12 +33,8 @@ router.get('/search', async (req, res) => {
 // GET PROFILE DETAILS
 router.get('/:username', async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username });
-    Profile.findOne({ user: db.Types.ObjectId(user._id) })
-      .then(profile => {
-        res.send(profile);
-      })
-      .catch(err => res.status(400).send(err));
+    const profile = await Profile.findOne({ username: req.params.username });
+    res.json(profile)
   } catch (err) {
     res.status(400).send(err);
   }

@@ -25,10 +25,4 @@ const removeUser = (id) => {
 
 const getUser = (id) => users.find((user) => user.id === id);
 
-const getUsersInRoom = (chat) => {
-  users.filter((user) => {
-    user.chat === chat;
-  });
-}
-
-module.exports = { addUser, getUser, removeUser, getUsersInRoom };
+module.exports = { addUser, getUser, removeUser };
