@@ -2,31 +2,18 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
-const passport = require('passport');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
 const dotenv = require('dotenv');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 
-const { addUser, getUser, removeUser, getUsersInRoom } = require('./helper')
+const { addUser, getUser, removeUser } = require('./helper')
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
-
-// FOLDER IMPORTS
-const initializePassport = require('../config/passport');
-const authRoutes = require('../routes/auth');
-const userRoutes = require('../routes/user');
-const profileRoutes = require('../routes/profile');
-const postRoutes = require('../routes/post');
-const commentRoutes = require('../routes/comment');
-const followRoutes = require('../routes/follow');
-const messageRoutes = require('../routes/message');
 
 // DATABASE
 mongoose.connect(process.env.MONGODB_URI, {
@@ -46,19 +33,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // MIDDLEWARE
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(cors({
-  origin: CORS_ORIGIN,
-  credentials: true,
-}));
-app.use(session({
-  secret: process.env.SECRET_TOKEN,
-  resave: true,
-  saveUninitialized: true,
-}));
-app.use(cookieParser(process.env.SECRET_TOKEN));
-app.use(passport.initialize());
-app.use(passport.session());
-initializePassport(passport);
+app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
 
 io.on('connection', (socket) => {
   console.log(`connected`)
@@ -86,10 +61,10 @@ io.on('connection', (socket) => {
 });
 
 // ROUTES
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/profiles', profileRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/comments', commentRoutes);
-app.use('/api/follows', followRoutes);
-app.use('/api/messages', messageRoutes);
+app.use('/api/auth', require('../routes/auth'));
+app.use('/api/users', require('../routes/user'));
+app.use('/api/profiles', require('../routes/profile'));
+app.use('/api/posts', require('../routes/post'));
+app.use('/api/comments', require('../routes/comment'));
+app.use('/api/follows', require('../routes/follow'));
+app.use('/api/messages', require('../routes/message'));
