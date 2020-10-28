@@ -25,6 +25,8 @@ router.post('/create', async (req, res) => {
     });
 
     await post.save();
+    await profile.posts.push(post)
+    await profile.save();
     res.send(post);
   } catch (err) {
     res.status(400).send(err);
