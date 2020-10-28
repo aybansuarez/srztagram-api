@@ -5,11 +5,11 @@ const profileSchema = new Schema({
   name: {
     type: String,
     required: true,
-    max: 255
+    max: 100
   },
   username: {
     type: String,
-    max: 255,
+    max: 25,
     unique: true,
     required: true
   },
@@ -43,12 +43,6 @@ const profileSchema = new Schema({
     type: Boolean,
     default: false
   },
-  user: {
-    type: Schema.Types.ObjectId,
-    unique: true,
-    required: true,
-    ref: 'User'
-  }
 }, { timestamps: true });
 
 
