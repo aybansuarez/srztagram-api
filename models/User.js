@@ -21,6 +21,10 @@ const userSchema = new Schema({
     required: true,
     min: 6,
     max: 1024
+  },
+  verified: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 
