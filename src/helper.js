@@ -11,7 +11,6 @@ const addUser = ({ id, profile, chat }) => {
 
   const user = { id, profile, chat }
   users.push(user);
-  console.log(users)
   return { user };
 }
 
