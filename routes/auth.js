@@ -145,6 +145,96 @@ router.post('/email-verify', async (req, res) => {
   }
 });
 
+router.post('/reset-password', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      $or: [{ username: req.body.username }, { email: req.body.username }]
+    }); 
+
+    if (!user)
+      return res.json({
+        msg: `We will send an email for password reset if
+        your username or email exists in our database.`
+      });
+
+    const token = await Token.findOne({
+      user: db.Types.ObjectId(user._id), type: 'password-reset', used: false
+    });
+
+    if (token)
+      return res.json({
+        msg: `We already sent an email to this account for password reset.
+        Please check your spam or inbox folder.`
+      });
+
+    const newToken = new Token({
+      user: db.Types.ObjectId(user._id),
+      type: 'password-reset',
+      token: crypto.randomBytes(16).toString('hex')
+    });
+    
+    await newToken.save();
+    
+    // Send email asynchronous
+    transporter.sendMail({
+      from: '"SRZtagram | Password Reset" <aybansrz@gmail.com>',
+      to: 'jedsuarez@gmail.com',
+      subject: 'Password Reset.',
+      template: 'passwordReset',
+      context: {
+        token: newToken.token,
+        username: user.username,
+        email: user.email,
+      }
+    });
+
+    return res.json({
+      msg: `We will send an email for password reset if
+      your username or email exists in our database.`
+    });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/verify-pass-token/:token', async (req, res) => {
+  try {
+    const token = await Token.findOne({
+      token: req.params.token, type: 'password-reset', used: 'false'
+    });
+
+    if (!token)
+      return res.status(400).json({ msg: 'Token already used or invalid.'});
+
+    res.send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/reset-password/new', async (req, res) => {
+  try {
+    if (req.body.password !== req.body.confirmPassword)
+      return res.status(400).json({ msg: 'Entered password does not match.' });
+
+    const token = await Token.findOne({
+      token: req.body.token, type: 'password-reset', used: 'false'
+    });
+    const user = await User.findById(db.Types.ObjectId(token.user));
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    user.password = hashedPassword;
+    await user.save()
+    token.used = true;
+    await token.save()
+
+    res.json({ msg: 'Password updated! Redirecting you to login page.'});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/authenticate', async (req, res) => {
   try {
     const token = req.header('auth-token');
