@@ -51,20 +51,25 @@ router.post('/signup', async (req, res) => {
 
     const token = new Token({
       user: db.Types.ObjectId(savedUser._id),
+      type: 'email-verification',
       token: crypto.randomBytes(16).toString('hex')
     });
 
     // Save the verification token
     await token.save()
 
-    // send mail with defined transport object
-    let info = await transporter.sendMail({
-      from: '"Ayban SRZ 👻" <aybansrz@gmail.com>', // sender address
-      to: "jedsuarez@gmail.com", // list of receivers
-      subject: "Verify your email", // Subject line
-      html: `<h1>Please verify your account by clicking the link: http://localhost:3000/email-verify/${token.token}</h1>`
+    // Send email asynchronous
+    transporter.sendMail({
+      from: '"SRZtagram | Verify Email" <aybansrz@gmail.com>',
+      to: 'jedsuarez@gmail.com',
+      subject: 'Thank you for signing up. Verify your email.',
+      template: 'verifyEmail',
+      context: {
+        token: token.token,
+        username,
+        email,
+      }
     });
-    console.log("Message sent: %s", info.messageId);
 
     res.json({ msg: 'Sign up success! Please verify your email.' });
   } catch (err) {
@@ -90,6 +95,11 @@ router.post('/login', async (req, res) => {
         { msg: 'Please provide the correct credentials.' }
       );
 
+    if (!user.verified)
+      return res.status(400).json(
+        { msg: 'This email is not yet verified. Please verify your email.' }
+      );
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json(
@@ -105,20 +115,21 @@ router.post('/login', async (req, res) => {
 
 router.post('/email-verify', async (req, res) => {
   try {
-    const token = await Token.findOne({ token: req.body.token });
+    const token = await Token.findOne({
+      token: req.body.token, type: 'email-verification', used: false
+    });
     if (!token)
       return res.status(400).json({
-        type: '404', msg: 'Token does not exist.'
+        type: '404',
+        msg: 'Unable to find token. Your token may have been used or expired.'
       });
 
     const user = await User.findById(token.user);
-    if (user.verified)
-      return res.status(400).json({
-        type: '409', msg: 'Email is already verified.'
-      });
 
     user.verified = true;
+    token.used = true;
     await user.save();
+    await token.save();
 
     const newProfile = new Profile({
       _id: db.Types.ObjectId(user._id),

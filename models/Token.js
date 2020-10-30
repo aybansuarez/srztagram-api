@@ -10,6 +10,14 @@ const tokenSchema = new Schema({
     type: String,
     required: true
   },
+  type: {
+    type: String,
+    required: true
+  },
+  used: {
+    type: Boolean,
+    default: false
+  },
   date: {
     type: Date,
     default: Date.now,
