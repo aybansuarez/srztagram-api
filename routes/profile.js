@@ -59,7 +59,11 @@ router.get('/:username/following', async (req, res) => {
 router.get('/:username', async (req, res) => {
   try {
     const profile = await Profile.findOne({ username: req.params.username });
-    res.json(profile)
+    const user = await User.findById(db.Types.ObjectId(profile._id));
+    const data = await JSON.parse(JSON.stringify(profile));
+    data.email = user.email;
+  
+    res.json(data);
   } catch (err) {
     res.status(400).send(err);
   }
