@@ -27,7 +27,11 @@ router.get('/chat/:id', async (req, res) => {
     let data;
     if (chat.messages.length > 0) {
       data = await chat
-        .populate({ path: 'profiles messages', populate: { path: 'profile' } }).execPopulate();
+        .populate({
+          path: 'profiles messages',
+          options: { sort: { createdAt: -1 } },
+          populate: { path: 'profile' }
+        }).execPopulate();
     } else {
       data = await chat.populate({ path: 'profiles' }).execPopulate();
     }
