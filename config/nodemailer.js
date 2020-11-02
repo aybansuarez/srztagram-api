@@ -1,14 +1,17 @@
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false,
   auth: {
-    user: 'aybansrz@gmail.com',
-    pass: 'aybanzxc24',
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
   },
   tls: {
     rejectUnauthorized: false
