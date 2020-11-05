@@ -8,7 +8,7 @@ const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 
-const { addUser, getUser, removeUser } = require('./helper')
+const { addUser, getUser, removeUser, getProfile } = require('./helper')
 
 dotenv.config();
 
@@ -36,13 +36,25 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
 
 io.on('connection', (socket) => {
-  console.log(`connected`)
+  console.log(`connected ${socket.id}`)
 
-  socket.on('join', ({ profile, chat }, callback) => {
-    const { error, user } = addUser({ id: socket.id, profile, chat });
-
+  socket.on('login', ({ profile }, callback) => {
+    const { error, user } = addUser({ id: socket.id, profile, chat: profile });
     if (error) return callback(error);
+    socket.join(user.chat);
+    callback();
+  })
 
+  socket.on('like', ({ profile, liker, post }, callback) => {
+    const user = getProfile(profile);
+    if (user)
+      io.to(user.chat).emit('notification', { liker, post });
+    callback();
+  })
+
+  socket.on('joinChat', ({ profile, chat }, callback) => {
+    const { error, user } = addUser({ id: socket.id, profile, chat });
+    if (error) return callback(error);
     socket.join(user.chat);
     callback();
   })
@@ -53,9 +65,14 @@ io.on('connection', (socket) => {
     callback();
   })
 
+  socket.on('disconnect', () => {
+    removeUser(socket.id);
+    console.log(`disconnected ${socket.id}`)
+  })
+
   socket.on('forceDisconnect', () => {
     removeUser(socket.id);
-    console.log(`disconnected`);
+    console.log(`disconnected ${socket.id}`);
     socket.disconnect();
   });
 });

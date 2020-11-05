@@ -20,8 +20,10 @@ const removeUser = (id) => {
   if (index !== -1) {
     return users.splice(index, 1)[0];
   }
+  console.log(users)
 }
 
 const getUser = (id) => users.find((user) => user.id === id);
+const getProfile = (id) => users.find((user) => user.chat === id);
 
-module.exports = { addUser, getUser, removeUser };
+module.exports = { addUser, getUser, removeUser, getProfile };
